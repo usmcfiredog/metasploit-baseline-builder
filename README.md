@@ -6,6 +6,7 @@ This project provides baseline virtual machines for creation of testing environm
 Prior to usage of the utility provided here the following must be obtained or configured:
 
 * A virtualization platform (i.e. VMWare Fusion, VMWare Workstation, VirtualBox)
+* Currently this repo only works on a Mac as it creates an OVA
 * Packer (https://www.packer.io/)
 * Installation media for the desired operating systems.
 * Python >= 2.7.11
