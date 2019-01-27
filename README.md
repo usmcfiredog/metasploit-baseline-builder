@@ -23,11 +23,6 @@ pip install vm-automation
 ### General
 Obtain all required iso files listed in `iso_list.json` make them available
 at `<install location>/iso`
-To build the msf_host be sure to init submodules
-```
-git submodule init
-git submodule update
-```
 
 
 ### VMWare Fusion and Workstation
