@@ -17,4 +17,3 @@ iso/
 custom.sh
 script/custom/*
 !script/custom/.gitkeep
-ubuntu1604.json
