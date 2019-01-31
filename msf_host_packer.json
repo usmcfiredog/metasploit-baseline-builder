@@ -13,5 +13,5 @@
   "ssh_fullname": "msfuser",
   "ssh_password": "vagrant",
   "ssh_username": "msfuser",
-  "custom_script": "../../scripts/msf_host/msf_host_setup.sh"
+  "custom_script": "../scripts/msf_host/msf_host_setup.sh"
 }
