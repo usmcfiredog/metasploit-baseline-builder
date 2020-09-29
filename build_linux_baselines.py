@@ -25,7 +25,7 @@ def build_base(packer_var_file, common_vars, packerfile, replace_existing, vmSer
     if not os.path.exists(temp_path):
         os.makedirs(temp_path)
 
-    output = vm_name + "_vmware.box"
+    output = vm_name + "_vmware.ova"
 
     only = ['vmware-iso']
 
@@ -34,7 +34,7 @@ def build_base(packer_var_file, common_vars, packerfile, replace_existing, vmSer
 
     packer_vars.update({
         "vm_name": prependString + vm_name,
-        "output": os.path.join("..", "..", "box", output)
+        "output": os.path.join("..", "..", "ova", output)
     })
 
     packer_vars.update(common_vars)
@@ -51,7 +51,7 @@ def build_base(packer_var_file, common_vars, packerfile, replace_existing, vmSer
         packer_obj.use_esxi_config()
     else:
         packer_obj.update_config({
-                        "output": "./../../box/" + output
+                        "output": "./../../ova/" + output
                     })
 
     packerfile = os.path.join(temp_path, "current_packer.json")
