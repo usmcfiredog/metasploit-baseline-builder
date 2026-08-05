@@ -12,7 +12,7 @@ from lib import packerMod
 from lib import serverHelper
 
 
-def build_base(packer_var_file, common_vars, packerfile, replace_existing, vmServer=None, prependString = ""):
+def build_base(packer_var_file, common_vars, packerfile, replace_existing, vmServer=None, prependString = "", factory_image = False):
     TEMP_DIR="tmp"
 
     vm_name = packer_var_file.strip(".json")
@@ -32,13 +32,23 @@ def build_base(packer_var_file, common_vars, packerfile, replace_existing, vmSer
     with open(os.path.join("", packer_var_file)) as packer_var_source:
         packer_vars = json.load(packer_var_source)
 
+    # Old Packer versions used a separate iso_checksum and iso_checksum_type keys.
+    # New Packer versions combine them together: "iso_checksum_type:iso_checksum"
+    # Let's implement a workaround for old Packer versions here rather than for each individual
+    # top-level Packer json template.
+    if 'iso_checksum_type' in packer_vars:
+        packer_vars['iso_checksum'] = packer_vars['iso_checksum_type'] + ':' + packer_vars['iso_checksum']
+        del packer_vars['iso_checksum_type']
+
     packer_vars.update({
         "vm_name": prependString + vm_name,
         "output": os.path.join("..", "..", "ova", output)
     })
 
     packer_vars.update(common_vars)
-
+    if factory_image:
+        del packer_vars["custom_script"]
+        
     packer_obj = packerMod(packerfile)
     packer_obj.update_linux_config(packer_vars)
 
@@ -89,22 +99,26 @@ def main(argv):
 
     prependString = ""
     replace_vms = False
+    factory_image = False
     esxi_file = "esxi_config.json"
 
     try:
-        opts, args = getopt.getopt(argv[1:], "c:hp:r", ["prependString="])
+        opts, args = getopt.getopt(argv[1:], "c:fhp:r", ["esxiConfig=", "factory", "help", "prependString=", "replace"])
     except getopt.GetoptError:
         print argv[0] + ' -n <numProcessors>'
         sys.exit(2)
     for opt, arg in opts:
-        if opt == '-h':
+        if opt in ("-h", "--help"):
             print argv[0] + " [options]"
-            print '-c <file>, --esxiConfig=<file>   use alternate hypervisor config file'
-            print '-p <string>, --prependString=<file>   prepend string to the beginning of VM names'
-            print '-r, --replace                     replace existing msf_host'
+            print '-c <file>, --esxiConfig=<file>       use alternate hypervisor config file'
+            print '-f, --factory                        builds system without additional packages'
+            print '-p <string>, --prependString=<file>  prepend string to the beginning of VM names'
+            print '-r, --replace                        replace existing msf_host'
             sys.exit()
         elif opt in ("-c", "--esxiConfig"):
             esxi_file = arg
+        elif opt in ("-f", "--factory"):
+            factory_image = True # Build with minimum required software, users and vm tools.
         elif opt in ("-p", "--prependString"):
             prependString = arg
         elif opt in ("-r", "--replace"):
@@ -129,7 +143,7 @@ def main(argv):
 
             print "\nBuilding " + str(len(targets)) + " " + os_dir.capitalize() + " baselines:"
             for target in tqdm(targets):
-                build_base(target, common_vars, packer_file, replace_existing=replace_vms, vmServer=vm_server, prependString=prependString)
+                build_base(target, common_vars, packer_file, replace_existing=replace_vms, vmServer=vm_server, prependString=prependString, factory_image=factory_image)
 
             os.chdir("../")
 
